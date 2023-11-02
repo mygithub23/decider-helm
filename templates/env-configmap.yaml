@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "decider-helm.fullname" . }}-env-configmap
+  labels:
+    component.service: db-env
+  {{- include "decider-helm.labels" . | nindent 4 }}
+data:
+  ADMIN_EMAIL: {{ .Values.envConfigmap.adminEmail | quote }}
+  ADMIN_PASS: {{ .Values.envConfigmap.adminPass | quote }}
+  CART_ENC_KEY: {{ .Values.envConfigmap.cartEncKey | quote }}
+  DB_DATABASE: {{ .Values.envConfigmap.dbDatabase | quote }}
+  DB_HOSTNAME: {{ .Values.envConfigmap.dbHostname | quote }}
+  DB_PASSWORD: {{ .Values.envConfigmap.dbPassword | quote }}
+  DB_PORT: {{ .Values.envConfigmap.dbPort | quote }}
+  DB_USERNAME: {{ .Values.envConfigmap.dbUsername | quote }}
+  WEB_HTTPS_ON: {{ .Values.envConfigmap.webHttpsOn | quote }}
+  WEB_IP: {{ .Values.envConfigmap.webIp | quote }}
+  WEB_PORT: {{ .Values.envConfigmap.webPort | quote }}

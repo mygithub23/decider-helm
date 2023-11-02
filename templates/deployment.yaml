@@ -1,0 +1,179 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "decider-helm.fullname" . }}-decider-db
+  labels:
+    app: decider-db
+  {{- include "decider-helm.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.deciderDb.replicas }}
+  selector:
+    matchLabels:
+      app: decider-db
+    {{- include "decider-helm.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: decider-db
+      {{- include "decider-helm.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: FULL_BUILD_MODE
+          value: {{ quote .Values.deciderDb.deciderDb.env.fullBuildMode }}
+        - name: DB_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              key: DB_HOSTNAME
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: DB_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              key: DB_DATABASE
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: DB_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              key: DB_USERNAME
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: DB_PASSWORD
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: DB_PORT
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: ADMIN_EMAIL
+          valueFrom:
+            configMapKeyRef:
+              key: ADMIN_EMAIL
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: ADMIN_PASS
+          valueFrom:
+            configMapKeyRef:
+              key: ADMIN_PASS
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: CART_ENC_KEY
+          valueFrom:
+            configMapKeyRef:
+              key: CART_ENC_KEY
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: WEB_HTTPS_ON
+          valueFrom:
+            configMapKeyRef:
+              key: WEB_HTTPS_ON
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: WEB_IP
+          valueFrom:
+            configMapKeyRef:
+              key: WEB_PORT
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: WEB_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: WEB_HTTPS_ON
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.deciderDb.deciderDb.image.repository }}:{{ .Values.deciderDb.deciderDb.image.tag
+          | default .Chart.AppVersion }}
+        name: decider-db
+        ports:
+        - containerPort: 5432
+          name: postgres
+          protocol: TCP
+        resources: {{- toYaml .Values.deciderDb.deciderDb.resources | nindent 10 }}
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data-init
+          name: postgres-persistent-storage
+        - mountPath: /docker-entrypoint-initdb.d
+          name: db-initialization
+      restartPolicy: Always
+      volumes:
+      - name: postgres-persistent-storage
+        persistentVolumeClaim:
+          claimName: ebs-postgres-claim
+      - configMap:
+          name: db-initialization-script
+        name: db-initialization
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "decider-helm.fullname" . }}-decider-web
+  labels:
+    app: decider-web
+  {{- include "decider-helm.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.deciderWeb.replicas }}
+  selector:
+    matchLabels:
+      app: decider-web
+    {{- include "decider-helm.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: decider-web
+      {{- include "decider-helm.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: FULL_BUILD_MODE
+          value: {{ quote .Values.deciderWeb.deciderWeb.env.fullBuildMode }}
+        - name: DB_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              key: DB_HOSTNAME
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: DB_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              key: DB_DATABASE
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: DB_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              key: DB_USERNAME
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: DB_PASSWORD
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: DB_PORT
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: ADMIN_EMAIL
+          valueFrom:
+            configMapKeyRef:
+              key: ADMIN_EMAIL
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: ADMIN_PASS
+          valueFrom:
+            configMapKeyRef:
+              key: ADMIN_PASS
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: CART_ENC_KEY
+          valueFrom:
+            configMapKeyRef:
+              key: CART_ENC_KEY
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: WEB_HTTPS_ON
+          valueFrom:
+            configMapKeyRef:
+              key: WEB_HTTPS_ON
+              name: {{ include "decider-helm.fullname" . }}-env-configmap
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.deciderWeb.deciderWeb.image.repository }}:{{ .Values.deciderWeb.deciderWeb.image.tag
+          | default .Chart.AppVersion }}
+        name: decider-web
+        ports:
+        - containerPort: 5000
+          protocol: TCP
+        resources: {{- toYaml .Values.deciderWeb.deciderWeb.resources | nindent 10 }}

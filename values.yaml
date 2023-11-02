@@ -1,0 +1,59 @@
+clientClusterIpService:
+  ports:
+  - name: "5000"
+    port: 5000
+    targetPort: 5000
+  type: ClusterIP
+dbService:
+  ports:
+  - name: "5432"
+    port: 5432
+    targetPort: 5432
+  type: ClusterIP
+deciderDb:
+  deciderDb:
+    env:
+      fullBuildMode: preserve
+    image:
+      repository: link-to-repo//decider-db
+      tag: v4
+    resources:
+      limits:
+        cpu: 100m
+        memory: 100Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+  replicas: 2
+deciderWeb:
+  deciderWeb:
+    env:
+      fullBuildMode: preserve
+    image:
+      repository: link-to-repo/decider-web
+      tag: v4
+    resources:
+      limits:
+        cpu: "1"
+        memory: 1Gi
+  replicas: 2
+envConfigmap:
+  adminEmail: admin@admin.com
+  adminPass: admin
+  cartEncKey: "12345678901234567890123456789012"
+  dbDatabase: decider
+  dbHostname: db
+  dbPassword: password
+  dbPort: "5432"
+  dbUsername: deciderdbuser
+  webHttpsOn: "yes"
+  webIp: 127.0.0.1
+  webPort: "5000"
+kubernetesClusterDomain: cluster.local
+postgresDbCredentials:
+  dbPassword: ""
+  dbUsername: ""
+pvc:
+  debsPostgresClaim:
+    storageClass: ebs-sc
+    storageRequest: 100Mi
